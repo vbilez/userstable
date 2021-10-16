@@ -1,0 +1,117 @@
+
+<html>
+<head>    
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link href="style.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/popper.js/dist/umd/popper.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="index.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="adduserModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adduserModalLabel">Add user</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="firstnameModal">First name</label>
+            <input type="text" class="form-control" id="firstnameModal" placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label for="lastnameModal">Last name</label>
+            <input type="text" class="form-control" id="lastnameModal" placeholder="Last name">
+          </div>
+          <div class="form-group">
+            <label for="roleModal">Role</label>
+            <select class="custom-select custom-select mr10" id="roleModal">
+              <option selected value="user">User</option>
+              <option value="admin">Admin</option>
+          </select>  
+          </div>
+
+          <div class="form-group">
+            <div for="activeswitch" class="mb10">Active</div>
+            <label class="switch">
+              <input type="checkbox" checked id="activeswitch">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <input type="hidden" id="userid"/>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="adduser" data-action="add">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deluserModal" tabindex="-1" role="dialog" aria-labelledby="deluserModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deluserModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          Delete this user?
+          <form>
+            <input type="hidden" id="deluserid"/>
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
+        <button type="button" class="btn btn-primary" id="deluser">YES</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-wrapper">
+   <div class="btn-group">
+            <button id="addbutton"type="button" class="btn btn-warning mr10" data-target="#addModal">Add</button>
+            
+
+  <select class="custom-select custom-select mr10" id="selectgroupoperation">
+          <option value="placeholder" selected>Please select option</option>
+          <option value="active">Set active</option>
+          <option value="notactive">Set not active</option>
+          <option value="delete">Delete</option>
+   </select>  
+   <button type="button" class="btn btn-warning" id="groupoperationok">OK</button>
+</div>
+<div class="mb10"></div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th class="w50">
+                            <input type="checkbox" class="checkAll" id="checkAll"/>
+                        </th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Role</th>
+                        <th style="width:150px">Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>    
+  </body>
+</html>
