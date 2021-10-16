@@ -137,6 +137,9 @@ $(document).on('click', '#addbutton', function (e) {
 
 						$("tbody").children().remove();
 						getRows(false);
+						$("#checkAll").attr('checked',false);
+						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
+						$("#selectgroupoperation").val('placeholder').change();
 						
 					}
 				}
@@ -155,6 +158,9 @@ $(document).on('click', '#addbutton', function (e) {
 
 						$("tbody").children().remove();
 						getRows(false);
+						$("#checkAll").attr('checked',false);
+						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
+						$("#selectgroupoperation").val('placeholder').change();
 						
 					}
 				}
@@ -173,6 +179,9 @@ $(document).on('click', '#addbutton', function (e) {
 
 						$("tbody").children().remove();
 						getRows(false);
+						$("#checkAll").attr('checked',false);
+						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
+						$("#selectgroupoperation").val('placeholder').change();
 						
 					}
 				}
@@ -248,11 +257,6 @@ $(document).on('click', '#addbutton', function (e) {
 $(document).ready(function(){
 
 	getRows(false);
-	
-
-
-
-	
 	 $("#checkAll").click(function(e) {
 	 	var table= $(e.target).closest('table');
     	$('tr td input:checkbox',table).attr('checked',e.target.checked);
