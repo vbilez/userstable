@@ -1,8 +1,30 @@
 function getTemplate(id,firstname, lastname, active, role)	
 	{
-		var rowtemplate = '<tr data-id="'+id+'" ><td class="checkbox"><input type="checkbox" data-id="'+id+'"></td><td>'+firstname+' '+lastname+'</td><td>'+active+'</td><td>'+role+'</td><td><div><a  id="editbutton" class="btn btn-info"  aria-label="Edit"><i class="fa fa-pencil editbutton" aria-hidden="true" data-id="'+id+'" data-active="'+active+'"></i></a><a class="btn btn-danger"  aria-label="Delete"><i class="fa fa-trash-o deletebutton" aria-hidden="true"  data-id="'+id+'"></i></a></div></td></tr>';
+		
+		var circleclass='circlegray';
+		if(active==1){
+			circleclass='circlegreen';
+		}
+		var rowtemplate = '<tr data-id="'+id+'" ><td class="checkbox"><input type="checkbox" data-id="'+id+'"></td><td>'+firstname+' '+lastname+'</td><td><div class="'+circleclass+'"></div></td><td>'+role+'</td><td><div><a  id="editbutton" class="btn btn-info"  aria-label="Edit"><i class="fa fa-pencil editbutton" aria-hidden="true" data-id="'+id+'" data-active="'+active+'"></i></a><a class="btn btn-danger"  aria-label="Delete"><i class="fa fa-trash-o deletebutton" aria-hidden="true"  data-id="'+id+'"></i></a></div></td></tr>';
 		return rowtemplate;
 	}
+
+	function clearModal()
+	{
+			$("#firstnameModal").val('');
+			$("#lastnameModal").val('');
+			$("#firstnameModal").css('border','1px solid #ced4da');
+			$("#lastnameModal").css('border','1px solid #ced4da');
+			$("#roleModal").val('user');
+			$("#addModal").find('.modal-title').text('Add user');
+			
+			$("#activeswitch").prop('checked', true);
+			$("#activeswitch").attr('checked', true);
+			$("#adduser").attr('data-action',"add");
+			$("#adduser").text("Add user");
+				
+	}
+	
 
 
 		function getRows(add)
@@ -53,11 +75,13 @@ function getTemplate(id,firstname, lastname, active, role)
 					}
 	}
 
-
+$(document).on('hidden.bs.modal', '#addModal', function (e) {
+	clearModal();
+});
 
 $(document).on('input', '#firstnameModal', function (e) {
   var text = e.target.value;
-  console.log(text);
+
   if (text==null || text=='') {
 	  $(this).css('border','1px solid red');
 	  return false;}
@@ -70,7 +94,7 @@ $(document).on('input', '#firstnameModal', function (e) {
 
 $(document).on('input', '#lastnameModal', function (e) {
   var text = e.target.value;
-  console.log(text);
+
   if (text==null || text=='') {
 	  $(this).css('border','1px solid red');
 	  return false;}
@@ -212,7 +236,6 @@ $(document).on('click', '#addbutton', function (e) {
 				success:function(data)
 				{
 
-						console.log(data);
 				
 					$("#deluserid").val(JSON.parse(data).id);
 					$('#deluserModal').modal('show');
