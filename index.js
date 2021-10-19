@@ -16,7 +16,7 @@
 
 		var fname = escapeHtml(firstname);
 		var lname = escapeHtml(lastname);
-		var rowtemplate = '<tr data-id="'+id+'" ><td class="checkbox"><input type="checkbox" data-id="'+id+'"></td><td class="username">'+fname+' '+lname+'</td><td><div class="'+circleclass+'"></div></td><td>'+role+'</td><td><div><a  id="editbutton" class="btn btn-info"  aria-label="Edit"><i class="fa fa-pencil editbutton" aria-hidden="true" data-id="'+id+'" data-active="'+active+'"></i></a><a class="btn btn-danger"  aria-label="Delete"><i class="fa fa-trash-o deletebutton" aria-hidden="true"  data-id="'+id+'"></i></a></div></td></tr>';
+		var rowtemplate = '<tr data-id="'+id+'" ><td class="checkbox"><input class="rowcheck" type="checkbox" data-id="'+id+'"></td><td class="username">'+fname+' '+lname+'</td><td><div class="'+circleclass+'"></div></td><td>'+role+'</td><td><div><a  id="editbutton" class="btn btn-info"  aria-label="Edit"><i class="fa fa-pencil editbutton" aria-hidden="true" data-id="'+id+'" data-active="'+active+'"></i></a><a class="btn btn-danger"  aria-label="Delete"><i class="fa fa-trash-o deletebutton" aria-hidden="true"  data-id="'+id+'"></i></a></div></td></tr>';
 		return rowtemplate;
 	}
 
@@ -156,8 +156,15 @@ function updateAfterGroupOperations(selectidbool)
 		  
 		 var selectvalue = e.target.id=="groupoperationok"? $("#selectgroupoperation").val() : $("#selectgroupoperationsecond").val();
 		 var selectidbool= e.target.id=="groupoperationok"? true : false;
+		  if(selectvalue=='placeholder')
+		  {
+			  $("#modalbodytext").text('Please select an option');
+			  $("#informationModal").modal('show');
+		  }
 		 if(selectvalue=='active')
 		 {
+
+			 if(ids.length==0) { $("#modalbodytext").text('Please check some rows');$("#informationModal").modal('show');return }
 			 $.ajax(
 				{
 					url:"user.php",
@@ -175,6 +182,7 @@ function updateAfterGroupOperations(selectidbool)
 
 		 if(selectvalue=='notactive')
 		 {
+			 if(ids.length==0) { $("#modalbodytext").text('Please check some rows');$("#informationModal").modal('show');return }
 			 $.ajax(
 				{
 					url:"user.php",
@@ -192,6 +200,7 @@ function updateAfterGroupOperations(selectidbool)
 
 		 if(selectvalue=='delete')
 		 {
+			  if(ids.length==0) { $("#modalbodytext").text('Please check some rows');$("#informationModal").modal('show');return }
 			 $.ajax(
 				{
 					url:"user.php",
@@ -228,7 +237,7 @@ function updateAfterGroupOperations(selectidbool)
 						$("#roleModal").val(user.role);
 						//$("#adduser").addClass('editaction');
 						$("#adduser").attr('data-action',"edit");
-						$("#adduser").text("Edit");
+						$("#adduser").text("Save/Update");
 						$("#userid").val(e.target.getAttribute("data-id"));
 						$("#firstnameModal").css('border','1px solid #ced4da');
 						$("#lastnameModal").css('border','1px solid #ced4da');
@@ -251,7 +260,28 @@ function updateAfterGroupOperations(selectidbool)
 	}); 
 
 	
+$(document).on('change', 'input.rowcheck[type="checkbox"]',function() {
+	console.log(this);
+	var table= $(this).closest('table');
+	var checkboxes=[];
+    if($(this).is(":checked")) {
+        Array.from($('tr td input:checkbox',table)).forEach(element=>{
+			if(element.checked) checkboxes.push(true);
+		});
 
+		if(checkboxes.length==Array.from($('tr td input:checkbox',table)).length)
+	{
+			$("#checkAll").attr('checked',true);
+		Array.from($('#checkAll'))[0].checked=true;
+	}
+   	
+    }
+	else {
+		$("#checkAll").attr('checked',false);
+		Array.from($('#checkAll'))[0].checked=false;
+
+	}
+});
 	$(document).on('click', '.deletebutton', function (e) {
 
 
