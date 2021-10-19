@@ -10,8 +10,23 @@ class User {
     public function adduser($firstname, $lastname,$active,$role)
     {
         $stmt = $this->database->dbc->prepare("insert into users (`id`, `firstname`, `lastname`, `active`, `role`) values(?,?,?,?,?)");
-        $stmt->execute(array('',$firstname,$lastname,$active,$role));
-        return $stmt;
+        $result = $stmt->execute(array('',$firstname,$lastname,$active,$role));
+        
+        if($result)  {
+
+            return json_encode(["status"=>true,"error"=>null,"user"=>[
+                "id"=>$this->database->dbc->lastInsertId(),
+                "firstname"=>$firstname,
+                "lastname"=>$lastname,
+                "active"=>$active,
+                "role"=>$role
+                ]
+            ]);
+        }
+        else {
+            return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+        }
+        
     }
 
     public function getUsers()
@@ -38,24 +53,46 @@ class User {
     {
 
         $stmt = $this->database->dbc->prepare("update users set firstname=?,lastname=?,active=?,role=? WHERE id=?");
-        $stmt->execute(array($firstname,$lastname,$active,$role,$id));
+        $result = $stmt->execute(array($firstname,$lastname,$active,$role,$id));
         
-        return json_encode((bool) $stmt);
+        if($result)  {
+
+            return json_encode(["status"=>true,"error"=>null,"user"=>[
+                "id"=>$id,
+                "firstname"=>$firstname,
+                "lastname"=>$lastname,
+                "active"=>$active,
+                "role"=>$role
+                ]
+            ]);
+        }
+        else {
+            return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+        }
     }
 
     public function deleteUser($id)
     {
 
         $stmt = $this->database->dbc->prepare("delete from users WHERE id=?");
-        $stmt->execute(array($id));
+        $result = $stmt->execute(array($id));
         
-        return json_encode((bool) $stmt);
+        if($result)  {
+
+            return json_encode(["status"=>true,"error"=>null,"user"=>[
+                "id"=>$id
+                ]
+            ]);
+        }
+        else {
+            return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+        }
     }
 
     public function updateUserStatus( $status, $ids)
     {
         $status=(int)$status;
-        $sqlInsert = "update `users` set active=".$status." WHERE id in(".implode(',',$ids).");";              // Insert/Update/Delete Statements:
+        $sqlInsert = "update `users` set active=".$status." WHERE id in(".implode(',',$ids).");";      
         $count = $this->database->runQuery($sqlInsert);
         return $count;
     }
@@ -76,7 +113,7 @@ if($_POST['action']=='adduser')
     $lastname=$_POST['lastname'];
     $active=$_POST['active'];
     $role=$_POST['role'];
-    $u->adduser($firstname, $lastname,$active,$role);
+    echo $u->adduser($firstname, $lastname,$active,$role);
 }
 
 if($_POST['action']=='getusers')

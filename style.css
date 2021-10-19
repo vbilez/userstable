@@ -198,3 +198,7 @@ input:checked + .slider:before {
 .username {
   word-break: break-all;
 }
+
+.textred {
+  color: red
+}

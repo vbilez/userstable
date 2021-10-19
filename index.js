@@ -35,8 +35,6 @@
 			$("#adduser").text("Add user");
 				
 	}
-	
-
 
 		function getRows(add)
 	{
@@ -90,10 +88,11 @@ $(document).on('hidden.bs.modal', '#addModal', function (e) {
 	clearModal();
 });
 
+
 $(document).on('input', '#firstnameModal', function (e) {
   var text = e.target.value;
-
-  if (text==null || text=='') {
+  var reg = /\s\s+/g;
+  if (text==null || text=='' || reg.test(text) || text==' ') {
 	  $(this).css('border','1px solid red');
 	  return false;}
   else {
@@ -105,8 +104,8 @@ $(document).on('input', '#firstnameModal', function (e) {
 
 $(document).on('input', '#lastnameModal', function (e) {
   var text = e.target.value;
-
-  if (text==null || text=='') {
+var reg = /\s\s+/g;
+  if (text==null || text=='' || reg.test(text) || text==' ') {
 	  $(this).css('border','1px solid red');
 	  return false;}
   else {
@@ -261,7 +260,7 @@ function updateAfterGroupOperations(selectidbool)
 
 	
 $(document).on('change', 'input.rowcheck[type="checkbox"]',function() {
-	console.log(this);
+
 	var table= $(this).closest('table');
 	var checkboxes=[];
     if($(this).is(":checked")) {
@@ -271,7 +270,7 @@ $(document).on('change', 'input.rowcheck[type="checkbox"]',function() {
 
 		if(checkboxes.length==Array.from($('tr td input:checkbox',table)).length)
 	{
-			$("#checkAll").attr('checked',true);
+		$("#checkAll").attr('checked',true);
 		Array.from($('#checkAll'))[0].checked=true;
 	}
    	
@@ -318,15 +317,32 @@ $(document).ready(function(){
 	$("#adduser").click(function(){
 
 	var switchvalue = $("#activeswitch").prop('checked') ? "1":"0";
-	if($("#firstnameModal").val()=='' || $("#lastnameModal").val()=='')
+    var reg = /\s\s+/g;
+	if(
+		$("#firstnameModal").val()=='' 
+		||$("#firstnameModal").val()==' ' 
+		|| $("#lastnameModal").val()==''
+		|| $("#lastnameModal").val()==' '
+		|| $("#lastnameModal").val()==null 
+		|| $("#firstnameModal").val()==null
+		|| reg.test($("#firstnameModal").val())
+		|| reg.test($("#lastnameModal").val())
+	)
 
 
 	{
-		if($("#firstnameModal").val()=='')
-		{ $("#firstnameModal").css('border','1px solid red');}
-		if($("#lastnameModal").val()=='')
-		{ $("#lastnameModal").css('border','1px solid red');}
-		return};
+		var firstnametext =$("#firstnameModal").val();
+		var lastnametext =$("#lastnameModal").val();
+		if (firstnametext==null || firstnametext=='' || reg.test(firstnametext) || firstnametext==' ') {
+			$("#firstnameModal").css('border','1px solid red');
+		}
+
+		if (lastnametext==null || lastnametext=='' || reg.test(lastnametext) || lastnametext==' ') {
+			$("#lastnameModal").css('border','1px solid red');
+		}
+
+		return
+	};
 	if($("#adduser").attr("data-action")=='add')
 		{
 			
@@ -337,9 +353,19 @@ $(document).ready(function(){
 				data:{action:'adduser',firstname:$("#firstnameModal").val(),lastname:$("#lastnameModal").val(),active:switchvalue,role:$("#roleModal").val()},
 				success:function(data)
 				{
-					$("table tbody").innerHTML="";
-					getRows(true);
-					$('#addModal').modal('hide');
+					var q = JSON.parse(data);
+					if(q.status)
+					{
+						$("table tbody").innerHTML="";
+						getRows(true);
+						$('#addModal').modal('hide');
+						console.log(q.user);
+					}
+					else {
+						$("#modalbodyerror").text(q.error.code+''+q.error.message);
+						$("#errorModal").modal('show');
+						console.log(q.error);
+					}
 				}
 			});
 		}
@@ -351,9 +377,21 @@ $(document).ready(function(){
 				data:{action:'edituser',userid:$("#userid").val(),firstname:$("#firstnameModal").val(),lastname:$("#lastnameModal").val(),active:switchvalue,role:$("#roleModal").val()},
 				success:function(data)
 				{
-					$("tbody").children().remove();
-					getRows(false);
-					$('#addModal').modal('hide');
+
+					var q = JSON.parse(data);
+					if(q.status)
+					{
+							$("tbody").children().remove();
+							getRows(false);
+							$('#addModal').modal('hide');
+							console.log(q.user);
+					}
+					else {
+						$("#modalbodyerror").text(q.error.code+''+q.error.message);
+						$("#errorModal").modal('show');
+						console.log(q.error);
+					}
+				
 				}
 			}
 		)
@@ -370,12 +408,21 @@ $(document).ready(function(){
 				data:{action:'deleteuser',userid:$("#deluserid").val()},
 				success:function(data)
 				{
-					if(data=='true')
+
+					var q = JSON.parse(data);
+					if(q.status)
 					{
 						$("tbody").children().remove();
 						getRows(false);
 						$('#deluserModal').modal('hide');
+						console.log(q.user);
 					}
+					else {
+						$("#modalbodyerror").text(q.error.code+''+q.error.message);
+						$("#errorModal").modal('show');
+						console.log(q.error);
+					}
+
 
 				}
 			}
