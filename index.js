@@ -1,11 +1,22 @@
-function getTemplate(id,firstname, lastname, active, role)	
+	function escapeHtml(text) {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+	}
+	function getTemplate(id,firstname, lastname, active, role)	
 	{
 		
 		var circleclass='circlegray';
 		if(active==1){
 			circleclass='circlegreen';
 		}
-		var rowtemplate = '<tr data-id="'+id+'" ><td class="checkbox"><input type="checkbox" data-id="'+id+'"></td><td>'+firstname+' '+lastname+'</td><td><div class="'+circleclass+'"></div></td><td>'+role+'</td><td><div><a  id="editbutton" class="btn btn-info"  aria-label="Edit"><i class="fa fa-pencil editbutton" aria-hidden="true" data-id="'+id+'" data-active="'+active+'"></i></a><a class="btn btn-danger"  aria-label="Delete"><i class="fa fa-trash-o deletebutton" aria-hidden="true"  data-id="'+id+'"></i></a></div></td></tr>';
+
+		var fname = escapeHtml(firstname);
+		var lname = escapeHtml(lastname);
+		var rowtemplate = '<tr data-id="'+id+'" ><td class="checkbox"><input type="checkbox" data-id="'+id+'"></td><td class="username">'+fname+' '+lname+'</td><td><div class="'+circleclass+'"></div></td><td>'+role+'</td><td><div><a  id="editbutton" class="btn btn-info"  aria-label="Edit"><i class="fa fa-pencil editbutton" aria-hidden="true" data-id="'+id+'" data-active="'+active+'"></i></a><a class="btn btn-danger"  aria-label="Delete"><i class="fa fa-trash-o deletebutton" aria-hidden="true"  data-id="'+id+'"></i></a></div></td></tr>';
 		return rowtemplate;
 	}
 
@@ -103,7 +114,7 @@ $(document).on('input', '#lastnameModal', function (e) {
 	   return true;}
 });
 
-$(document).on('click', '#addbutton', function (e) {
+$(document).on('click', '#addbutton, #addbuttonsecond', function (e) {
 	$("#firstnameModal").val('');
 	$("#lastnameModal").val('');
 	$("#firstnameModal").css('border','1px solid #ced4da');
@@ -116,15 +127,35 @@ $(document).on('click', '#addbutton', function (e) {
 	$("#addModal").modal("show");
 });
 
-	$(document).on('click', '#groupoperationok', function (e) {
+
+function updateAfterGroupOperations(selectidbool)
+{
+	$("tbody").children().remove();
+						getRows(false);
+						$("#checkAll").attr('checked',false);
+						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
+
+
+						if(selectidbool) {
+							$("#selectgroupoperation").val('placeholder').change();
+						}
+						else  {
+							$("#selectgroupoperationsecond").val('placeholder').change();
+						};
+}
+	$(document).on('click', '#groupoperationok, #groupoperationoksecond', 	  function (e) {
 
 
 		var table= $('#checkAll').closest('table');
 		var ids=[];
+		var groupoperationselect = false;
   		Array.from($('tr td input:checkbox',table)).forEach(element=>{
 			  if(element.checked) ids.push(element.dataset.id);
 		  });
-		 var selectvalue = $("#selectgroupoperation").val();
+		  console.log(e.target.id);
+		  
+		 var selectvalue = e.target.id=="groupoperationok"? $("#selectgroupoperation").val() : $("#selectgroupoperationsecond").val();
+		 var selectidbool= e.target.id=="groupoperationok"? true : false;
 		 if(selectvalue=='active')
 		 {
 			 $.ajax(
@@ -135,11 +166,7 @@ $(document).on('click', '#addbutton', function (e) {
 					success:function(data)
 					{
 
-						$("tbody").children().remove();
-						getRows(false);
-						$("#checkAll").attr('checked',false);
-						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
-						$("#selectgroupoperation").val('placeholder').change();
+						updateAfterGroupOperations(selectidbool);
 						
 					}
 				}
@@ -156,11 +183,7 @@ $(document).on('click', '#addbutton', function (e) {
 					success:function(data)
 					{
 
-						$("tbody").children().remove();
-						getRows(false);
-						$("#checkAll").attr('checked',false);
-						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
-						$("#selectgroupoperation").val('placeholder').change();
+						updateAfterGroupOperations(selectidbool);
 						
 					}
 				}
@@ -177,11 +200,7 @@ $(document).on('click', '#addbutton', function (e) {
 					success:function(data)
 					{
 
-						$("tbody").children().remove();
-						getRows(false);
-						$("#checkAll").attr('checked',false);
-						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
-						$("#selectgroupoperation").val('placeholder').change();
+						updateAfterGroupOperations(selectidbool);
 						
 					}
 				}
@@ -247,6 +266,7 @@ $(document).on('click', '#addbutton', function (e) {
 
 				
 					$("#deluserid").val(JSON.parse(data).id);
+					$("#delusertextid").text(JSON.parse(data).id);
 					$('#deluserModal').modal('show');
 					
 				}

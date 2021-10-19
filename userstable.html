@@ -68,7 +68,7 @@
         </button>
       </div>
       <div class="modal-body">
-          Delete this user?
+          Delete user <span id="delusername"></span> with id <span id="delusertextid"></span>?
           <form>
             <input type="hidden" id="deluserid"/>
           </form>
@@ -81,11 +81,9 @@
   </div>
 </div>
 
-<div class="table-wrapper">
+<div class="table-wrapper" >
    <div class="btn-group">
-            <button id="addbutton"type="button" class="btn btn-warning mr10" >Add</button>
-            
-
+  <button id="addbutton"type="button" class="btn btn-warning mr10" >Add</button>
   <select class="custom-select custom-select mr10" id="selectgroupoperation">
           <option value="placeholder" selected>Please select option</option>
           <option value="active">Set active</option>
@@ -94,23 +92,33 @@
    </select>  
    <button type="button" class="btn btn-warning" id="groupoperationok">OK</button>
 </div>
-<div class="mb10"></div>
-            <table class="table table-bordered">
+<div class="mb10" ></div>
+            <table class="table table-bordered" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th class="w50">
+                        <th scope="col" class="w50">
                             <input type="checkbox" class="checkAll" id="checkAll"/>
                         </th>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Role</th>
-                        <th style="width:150px">Options</th>
+                        <th scope="col">Name</th>
+                        <th >Status</th>
+                        <th >Role</th>
+                        <th style="width:150px" scope="col">Options</th>
                     </tr>
                 </thead>
                 <tbody>
                     
                 </tbody>
             </table>
+            <div class="btn-group">
+              <button id="addbuttonsecond"type="button" class="btn btn-warning mr10" >Add</button>
+              <select class="custom-select custom-select mr10" id="selectgroupoperationsecond">
+                      <option value="placeholder" selected>Please select option</option>
+                      <option value="active">Set active</option>
+                      <option value="notactive">Set not active</option>
+                      <option value="delete">Delete</option>
+               </select>  
+               <button type="button" class="btn btn-warning" id="groupoperationoksecond">OK</button>
+            </div>
         </div>
     </div>    
   </body>

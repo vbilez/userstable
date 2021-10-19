@@ -3,8 +3,10 @@ body {
         background: #F5F7FA;
         font-family: 'Open Sans', sans-serif;
     }
+    table{table-layout: fixed;}
+    
     .table-wrapper {
-        width: 700px;
+ 
         margin: 30px auto;
         background: #fff;
         padding: 20px;  
@@ -189,3 +191,10 @@ input:checked + .slider:before {
 }
 
 
+.container {
+  max-width: inherit;
+}
+
+.username {
+  word-break: break-all;
+}
