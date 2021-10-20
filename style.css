@@ -202,3 +202,8 @@ input:checked + .slider:before {
 .textred {
   color: red
 }
+
+.textblack {
+  color: black;
+  font-weight: bold;
+}

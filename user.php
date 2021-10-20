@@ -24,7 +24,7 @@ class User {
             ]);
         }
         else {
-            return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+            return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]?$this->database->dbc->errorInfo()[2]:"user not created"]]);
         }
         
     }
@@ -45,64 +45,148 @@ class User {
         $stmt = $this->database->dbc->prepare("select * from users WHERE id=?");
         $stmt->execute(array($id));
         $result= $stmt->fetch(PDO::FETCH_ASSOC);
-        return json_encode($result);
+        return $result;
+        
+    }
+    public function getUser_json($id)
+    {
+        $user = $this->getUser($id);
+        if($user)
+        {
+            return json_encode(["status"=>true,"error"=>null,"user"=>[
+                "id"=>$user["id"],
+                "firstname"=>$user["firstname"],
+                "lastname"=>$user["lastname"],
+                "active"=>$user["active"],
+                "role"=>$user["role"]
+                ]
+            ]);
+        }
+        else {
+            return json_encode(["status"=>false,"error"=>["code"=>"1","message"=>"user with id ".strval($id)." not exists"]]);
+        }
         
     }
 
     public function editUser($id, $firstname, $lastname, $active, $role)
     {
+        if($this->getUser($id))
+        {
+            $stmt = $this->database->dbc->prepare("update users set firstname=?,lastname=?,active=?,role=? WHERE id=?");
+            $result = $stmt->execute(array($firstname,$lastname,$active,$role,$id));
+            
+            if($result)  {
 
-        $stmt = $this->database->dbc->prepare("update users set firstname=?,lastname=?,active=?,role=? WHERE id=?");
-        $result = $stmt->execute(array($firstname,$lastname,$active,$role,$id));
-        
-        if($result)  {
+                return json_encode(["status"=>true,"error"=>null,"user"=>[
+                    "id"=>$id,
+                    "firstname"=>$firstname,
+                    "lastname"=>$lastname,
+                    "active"=>$active,
+                    "role"=>$role
+                    ]
+                ]);
+            }
+            else {
+                return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+            }
 
-            return json_encode(["status"=>true,"error"=>null,"user"=>[
-                "id"=>$id,
-                "firstname"=>$firstname,
-                "lastname"=>$lastname,
-                "active"=>$active,
-                "role"=>$role
-                ]
-            ]);
         }
+
         else {
-            return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+            return json_encode(["status"=>false,"error"=>["code"=>"1","message"=>"user with id ".strval($id)." not exists"]]);
         }
     }
 
     public function deleteUser($id)
     {
-
+        if($this->getUser($id))
+        {
         $stmt = $this->database->dbc->prepare("delete from users WHERE id=?");
         $result = $stmt->execute(array($id));
         
-        if($result)  {
+            if($result)  {
 
-            return json_encode(["status"=>true,"error"=>null,"user"=>[
-                "id"=>$id
-                ]
-            ]);
+                return json_encode(["status"=>true,"error"=>null,"user"=>[
+                    "id"=>$id
+                    ]
+                ]);
+            }
+            else {
+                return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+            }
         }
         else {
-            return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+            return json_encode(["status"=>false,"error"=>["code"=>"1","message"=>"user with id ".strval($id)." not exists"]]);
         }
     }
 
     public function updateUserStatus( $status, $ids)
     {
         $status=(int)$status;
-        $sqlInsert = "update `users` set active=".$status." WHERE id in(".implode(',',$ids).");";      
-        $count = $this->database->runQuery($sqlInsert);
-        return $count;
+        $idsins=[];
+        $wrongids=[];
+        foreach($ids as $id)
+        {
+            if($this->getUser($id))
+            {
+               // $idsins[]=$id;
+            }
+            else 
+            {
+                $wrongids[]=$id;
+            }
+        }
+        if (count($wrongids)>0)
+        {
+            return json_encode(["status"=>false,"error"=>["code"=>"3","message"=>"users with ids ".implode(",",$wrongids)." not exists"]]);
+        }
+        else {
+
+        
+            $sqlInsert = "update `users` set active=".$status." WHERE id in(".implode(',',$ids).");";      
+            $result = $this->database->runQuery($sqlInsert);
+            if($result)  {
+
+                return json_encode(["status"=>true,"error"=>null,"active"=>$status,"ids"=>$ids]);
+            }
+            else {
+                return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+            }
+        }
     }
 
     public function deleteUsers( $ids)
     {
 
-        $sqlInsert = "delete from `users` WHERE id in(".implode(',',$ids).");";           
-        $count = $this->database->runQuery($sqlInsert);
-        return $count;
+        $idsins=[];
+        $wrongids=[];
+        foreach($ids as $id)
+        {
+            if($this->getUser($id))
+            {
+               // $idsins[]=$id;
+            }
+            else 
+            {
+                $wrongids[]=$id;
+            }
+        }
+        if (count($wrongids)>0)
+        {
+            return json_encode(["status"=>false,"error"=>["code"=>"3","message"=>"users with ids ".implode(",",$wrongids)." not exists"]]);
+        }
+        else 
+        {
+            $sqlInsert = "delete from `users` WHERE id in(".implode(',',$ids).");";           
+            $result = $this->database->runQuery($sqlInsert);
+            if($result)  {
+
+                return json_encode(["status"=>true,"error"=>null,"ids"=>$ids]);
+            }
+            else {
+                return json_encode(["status"=>false,"error"=>["code"=>$this->database->dbc->errorInfo()[0],"message"=>$this->database->dbc->errorInfo()[2]]]);
+            }
+        }
     }
 }
 
@@ -124,7 +208,7 @@ if($_POST['action']=='getusers')
 if($_POST['action']=='getuser')
 {
     $id = $_POST['userid'];
-    echo  $u->getUser((int)$id);
+    echo  $u->getUser_json((int)$id);
 }
 
 if($_POST['action']=='edituser')
@@ -148,13 +232,12 @@ if($_POST['action']=='changeuserstatus')
     $ids = $_POST['ids'];
 
     $status = $_POST['status'];
-    echo json_encode($ids);
-    echo  $u->updateUserStatus($status, $ids);
+
+    echo $u->updateUserStatus($status, $ids);
 }
 
 if($_POST['action']=='deleteusers')
 {
     $ids = $_POST['ids'];
-    echo json_encode($ids);
     echo  $u->deleteUsers($ids);
 }

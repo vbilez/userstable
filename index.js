@@ -1,3 +1,14 @@
+	function setError(code,message)
+	{
+
+		$("#modalbodyerror").children().eq(1).text(code);
+		$("#modalbodyerror").children().eq(2).text(message);
+		$("#addModal").modal("hide");
+		$("#deluserModal").modal("hide");
+		$("#informationModal").modal("hide");
+		$("#errorModal").modal("show");
+	}
+
 	function escapeHtml(text) {
 	return text
 		.replace(/&/g, "&amp;")
@@ -34,6 +45,27 @@
 			$("#adduser").attr('data-action',"add");
 			$("#adduser").text("Add user");
 				
+	}
+
+	function setEditRow(dataid, firstname, lastname, active, role){
+		var  tr = $('table tbody').children('tr[data-id="'+dataid+'"]').first();
+			tr.children("td").eq(1).html(firstname+" "+lastname);
+			if(active==1)
+	{
+		tr.children("td").eq(2).find("div").removeClass('circlegray').addClass('circlegreen');
+	}
+	else {
+		tr.children("td").eq(2).find("div").removeClass('circlegreen').addClass('circlegray');
+	}
+			
+		tr.children("td").eq(3).html(role);
+
+	}
+
+	function deleteRow(dataid)
+	{
+		var  tr = $('table tbody').children('tr[data-id="'+dataid+'"]').first();
+		tr.remove();
 	}
 
 		function getRows(add)
@@ -126,11 +158,38 @@ $(document).on('click', '#addbutton, #addbuttonsecond', function (e) {
 	$("#addModal").modal("show");
 });
 
+function GroupOperations(e){
 
-function updateAfterGroupOperations(selectidbool)
+}
+
+function updateAfterGroupOperations(selectidbool,ids,operation)
 {
-	$("tbody").children().remove();
-						getRows(false);
+						//$("tbody").children().remove();
+						//getRows(false);
+						 $('table tbody').children('tr').each(function()
+						 {
+							var currentElement = $(this);
+							var elid= currentElement.attr('data-id');
+							ids.forEach(el =>
+							{
+							if(el==elid)
+								{
+									if(operation=='active')
+									{
+										currentElement.children("td").eq(2).find("div").removeClass('circlegray').addClass('circlegreen');
+									}
+									if(operation=='notactive') {
+										currentElement.children("td").eq(2).find("div").removeClass('circlegreen').addClass('circlegray');
+									}
+									if(operation=='delete') {
+										currentElement.remove();
+									}
+								}
+							}
+							);
+						
+
+						 });
 						$("#checkAll").attr('checked',false);
 						Array.from($("#checkAll")).forEach(element=>{element.checked=false});
 
@@ -142,16 +201,18 @@ function updateAfterGroupOperations(selectidbool)
 							$("#selectgroupoperationsecond").val('placeholder').change();
 						};
 }
-	$(document).on('click', '#groupoperationok, #groupoperationoksecond', 	  function (e) {
+	$(document).on('click', '#groupoperationok, #groupoperationoksecond', function (e) {
+
+		
 
 
-		var table= $('#checkAll').closest('table');
+	  var table= $('#checkAll').closest('table');
 		var ids=[];
 		var groupoperationselect = false;
   		Array.from($('tr td input:checkbox',table)).forEach(element=>{
 			  if(element.checked) ids.push(element.dataset.id);
 		  });
-		  console.log(e.target.id);
+
 		  
 		 var selectvalue = e.target.id=="groupoperationok"? $("#selectgroupoperation").val() : $("#selectgroupoperationsecond").val();
 		 var selectidbool= e.target.id=="groupoperationok"? true : false;
@@ -171,8 +232,13 @@ function updateAfterGroupOperations(selectidbool)
 					data:{action:'changeuserstatus',status:1,ids:ids},
 					success:function(data)
 					{
-
-						updateAfterGroupOperations(selectidbool);
+						var q= JSON.parse(data);
+						if(q.status){
+							updateAfterGroupOperations(selectidbool,q.ids,selectvalue);
+						}
+						else {
+							 setError(q.error.code,q.error.message);
+						}
 						
 					}
 				}
@@ -190,7 +256,13 @@ function updateAfterGroupOperations(selectidbool)
 					success:function(data)
 					{
 
-						updateAfterGroupOperations(selectidbool);
+						var q= JSON.parse(data);
+						if(q.status){
+							updateAfterGroupOperations(selectidbool,q.ids,selectvalue);
+						}
+						else {
+							setError(q.error.code,q.error.message);
+						}
 						
 					}
 				}
@@ -200,7 +272,19 @@ function updateAfterGroupOperations(selectidbool)
 		 if(selectvalue=='delete')
 		 {
 			  if(ids.length==0) { $("#modalbodytext").text('Please check some rows');$("#informationModal").modal('show');return }
-			 $.ajax(
+
+			  const modal = new Promise(function(resolve, reject){
+       $('#confirmModal').modal('show');
+       $('#confirmModal .btn-primary').click(function(){
+           resolve("user clicked");
+       });
+       $('#confirmModal .btn-secondary').click(function(){
+           reject("user clicked cancel");
+		   return;
+       });
+      }).then(function(val){
+       
+		 $.ajax(
 				{
 					url:"user.php",
 					type:'POST',
@@ -208,12 +292,26 @@ function updateAfterGroupOperations(selectidbool)
 					success:function(data)
 					{
 
-						updateAfterGroupOperations(selectidbool);
-						
+						var q= JSON.parse(data);
+						if(q.status){
+							updateAfterGroupOperations(selectidbool,q.ids,selectvalue);
+						}
+						else {
+							setError(q.error.code,q.error.message);
+						}
 					}
 				}
-			)
-		 }
+			);
+		$('#confirmModal').modal('hide');
+      }).catch(function(err){
+        //user clicked cancel
+        
+
+      });
+			
+		 }	
+
+		
 		
 
 	}); 
@@ -229,30 +327,36 @@ function updateAfterGroupOperations(selectidbool)
 					data:{action:'getuser',userid:e.target.getAttribute("data-id")},
 					success:function(data)
 					{
+						let q= JSON.parse(data);
+						if(q.status){
 
-						let user =	JSON.parse(data);
-						$("#firstnameModal").val(user.firstname);
-						$("#lastnameModal").val(user.lastname);
-						$("#roleModal").val(user.role);
-						//$("#adduser").addClass('editaction');
-						$("#adduser").attr('data-action',"edit");
-						$("#adduser").text("Save/Update");
-						$("#userid").val(e.target.getAttribute("data-id"));
-						$("#firstnameModal").css('border','1px solid #ced4da');
-						$("#lastnameModal").css('border','1px solid #ced4da');
-						$("#addModal").find('.modal-title').text('Edit user');
-						if(e.target.getAttribute("data-active")=="1")
-					{
-						$("#activeswitch").prop('checked',true);
-						$("#activeswitch").attr('checked',true);
-					}
-					else 
-					{
-						$("#activeswitch").prop('checked',false);
-						$("#activeswitch").attr('checked',false);
-					}
-						$('#addModal').modal('show');
 						
+						let user =	q.user;
+							$("#firstnameModal").val(user.firstname);
+							$("#lastnameModal").val(user.lastname);
+							$("#roleModal").val(user.role);
+							//$("#adduser").addClass('editaction');
+							$("#adduser").attr('data-action',"edit");
+							$("#adduser").text("Save/Update");
+							$("#userid").val(e.target.getAttribute("data-id"));
+							$("#firstnameModal").css('border','1px solid #ced4da');
+							$("#lastnameModal").css('border','1px solid #ced4da');
+							$("#addModal").find('.modal-title').text('Edit user');
+							if(e.target.getAttribute("data-active")=="1")
+								{
+									$("#activeswitch").prop('checked',true);
+									$("#activeswitch").attr('checked',true);
+								}
+								else 
+								{
+									$("#activeswitch").prop('checked',false);
+									$("#activeswitch").attr('checked',false);
+								}
+							$('#addModal').modal('show');
+						}
+						else {
+							setError(q.error.code,q.error.message);
+						}
 					}
 				}
 			)
@@ -293,10 +397,17 @@ $(document).on('change', 'input.rowcheck[type="checkbox"]',function() {
 				success:function(data)
 				{
 
-				
-					$("#deluserid").val(JSON.parse(data).id);
-					$("#delusertextid").text(JSON.parse(data).id);
+				let q= JSON.parse(data);
+				if(q.status){
+					let user = q.user;
+					$("#deluserid").val(user.id);
+					$("#delusertextid").text(user.firstname);
 					$('#deluserModal').modal('show');
+				}
+				else {
+						setError(q.error.code,q.error.message);
+				}
+					
 					
 				}
 			}
@@ -356,20 +467,22 @@ $(document).ready(function(){
 					var q = JSON.parse(data);
 					if(q.status)
 					{
-						$("table tbody").innerHTML="";
-						getRows(true);
+						//$("table tbody").innerHTML="";
+						//getRows(true);
+						$("table tbody").append(getTemplate(q.user.id,q.user.firstname,q.user.lastname,q.user.active,q.user.role));
 						$('#addModal').modal('hide');
 						console.log(q.user);
 					}
 					else {
-						$("#modalbodyerror").text(q.error.code+''+q.error.message);
-						$("#errorModal").modal('show');
+						setError(q.error.code,q.error.message);
 						console.log(q.error);
 					}
 				}
 			});
 		}
 		else {
+			
+
 			$.ajax(
 			{
 				url:"user.php",
@@ -381,14 +494,12 @@ $(document).ready(function(){
 					var q = JSON.parse(data);
 					if(q.status)
 					{
-							$("tbody").children().remove();
-							getRows(false);
+							setEditRow(q.user.id,q.user.firstname,q.user.lastname,q.user.active,q.user.role);
 							$('#addModal').modal('hide');
 							console.log(q.user);
 					}
 					else {
-						$("#modalbodyerror").text(q.error.code+''+q.error.message);
-						$("#errorModal").modal('show');
+						setError(q.error.code,q.error.message);
 						console.log(q.error);
 					}
 				
@@ -412,14 +523,12 @@ $(document).ready(function(){
 					var q = JSON.parse(data);
 					if(q.status)
 					{
-						$("tbody").children().remove();
-						getRows(false);
+						deleteRow(q.user.id);
 						$('#deluserModal').modal('hide');
 						console.log(q.user);
 					}
 					else {
-						$("#modalbodyerror").text(q.error.code+''+q.error.message);
-						$("#errorModal").modal('show');
+						setError(q.error.code,q.error.message);
 						console.log(q.error);
 					}
 
